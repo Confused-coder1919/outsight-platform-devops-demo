@@ -32,6 +32,16 @@ Kubernetes (k3d)
 - On pushes to `main`, GitHub Actions opens a PR updating `gitops/tenants/*-values.yaml` with the new tag.
 - Argo CD watches the repo and syncs the updated Helm values into each tenant namespace.
 
+## Why GitOps
+
+- Git is the single source of truth for tenant config and image versions.
+- PRs provide an audit trail and make promotion explicit and reviewable.
+
+## Why namespace-per-tenant
+
+- It is the simplest isolation boundary in Kubernetes and easy to reason about.
+- It maps cleanly to per-tenant quotas, RBAC, and NetworkPolicy.
+
 ## Multi-tenant model (namespace isolation)
 
 - Each tenant gets a dedicated namespace (`tenant-a`, `tenant-b`).
@@ -45,6 +55,11 @@ Kubernetes (k3d)
 - Promtail carries tenant/app/environment labels into logs for targeted Loki queries.
 - Optional cloud-native integration: in production, the same metrics/logs could be
   forwarded to CloudWatch or a managed SaaS; here it is documented only.
+
+## Centralized vs tenant-isolated observability
+
+- Centralized observability is cheaper and simpler but increases shared blast radius.
+- Tenant-isolated observability reduces risk but adds operational cost and complexity.
 
 ## Hardening choices
 
@@ -66,3 +81,9 @@ Kubernetes (k3d)
 - Namespace isolation is practical for demos but not a hard security boundary.
 - Centralized observability reduces ops overhead but increases shared blast radius.
 - GitOps PRs provide auditability at the cost of extra CI workflow steps.
+
+## What changes in AWS / hybrid (conceptual)
+
+- Replace local k3d with managed Kubernetes (EKS) and use IRSA for least-privilege access.
+- Push images to ECR (still lowercase naming) and mirror GitOps flow with the same PR model.
+- Optionally federate metrics/logs into a managed backend while keeping tenant labels intact.

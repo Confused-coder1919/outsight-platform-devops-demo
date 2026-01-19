@@ -51,7 +51,7 @@ jobs:
           registry: ghcr.io
           username: ${{ github.actor }}
           # GITHUB_TOKEN has packages: write permission from the workflow.
-          password: ${{ secrets.GITHUB_TOKEN }}
+          password: ${{ github.token }}
       - name: Build and push image
         uses: docker/build-push-action@v5
         with:
@@ -69,8 +69,10 @@ jobs:
           yq -i '.image.repository = env(IMAGE_REPO) | .image.tag = env(IMAGE_TAG)' gitops/tenants/tenant-a-values.yaml
           yq -i '.image.repository = env(IMAGE_REPO) | .image.tag = env(IMAGE_TAG)' gitops/tenants/tenant-b-values.yaml
       - name: Create PR with updated image tags
+        id: gitops_pr
         uses: peter-evans/create-pull-request@v6
-        if: ${{ github.event.repository.fork == false }}
+        if: ${{ github.event.repository.fork == false && !startsWith(github.ref, 'refs/heads/ci/update-image-') }}
+        continue-on-error: true
         with:
           # GitOps changes flow through a PR for auditability.
           branch: "ci/update-image-${{ env.SHORT_SHA }}"
@@ -81,3 +83,8 @@ jobs:
           add-paths: |
             gitops/tenants/tenant-a-values.yaml
             gitops/tenants/tenant-b-values.yaml
+      - name: Report GitOps PR creation failure
+        if: steps.gitops_pr.outcome == 'failure'
+        run: |
+          echo "GitOps PR creation failed. Ensure the workflow has contents: write and pull-requests: write permissions."
+          echo "If this is a fork, PR creation is intentionally skipped."

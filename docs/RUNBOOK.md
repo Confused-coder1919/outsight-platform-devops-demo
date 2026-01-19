@@ -52,10 +52,10 @@ kubectl get pods -n tenant-b
 ## Access the app
 
 ```bash
-kubectl -n tenant-a port-forward svc/demo-api 8081:80
+kubectl -n tenant-a port-forward svc/demo-api 8081:8000
 curl http://localhost:8081/
 
-kubectl -n tenant-b port-forward svc/demo-api 8082:80
+kubectl -n tenant-b port-forward svc/demo-api 8082:8000
 curl http://localhost:8082/
 ```
 
@@ -86,6 +86,23 @@ In Grafana Explore, select the Loki datasource and try the queries in:
 
 ```bash
 make docker-build TAG=dev
+```
+
+## Optional: local container run
+
+```bash
+make docker-run TAG=dev
+curl http://127.0.0.1:8000/health
+curl http://127.0.0.1:8000/metrics | head -n 5
+```
+
+## Local image (no GHCR)
+
+Build the image with the same GHCR name used by the chart so k3d can find it locally
+when `imagePullPolicy: IfNotPresent` is set.
+
+```bash
+docker build -t ghcr.io/confused-coder1919/outsight-platform-devops-demo/demo-api:dev .
 ```
 
 ## Notes

@@ -22,6 +22,33 @@ kubectl get pods -n tenant-a
 kubectl get pods -n tenant-b
 ```
 
+## CI/CD + GitOps flow (short)
+
+- PRs: lint + tests only.
+- Push to `main`: build/push image to GHCR, update tenant image values, open a GitOps PR.
+- Argo CD syncs the merged values into tenant namespaces.
+
+## Local Docker (sanity check)
+
+```bash
+make docker-build TAG=dev
+make docker-run TAG=dev
+```
+
+```bash
+curl http://127.0.0.1:8000/health
+curl http://127.0.0.1:8000/metrics | head -n 5
+```
+
+## Local image (no GHCR)
+
+Build the image with the same GHCR name used by the chart so k3d can find it locally
+when `imagePullPolicy: IfNotPresent` is set.
+
+```bash
+docker build -t ghcr.io/confused-coder1919/outsight-platform-devops-demo/demo-api:dev .
+```
+
 ## Docs
 
 - `docs/ARCHITECTURE.md`

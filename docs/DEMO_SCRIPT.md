@@ -60,7 +60,7 @@ Expected:
 ## Show tenant-a vs tenant-b behavior
 
 ```bash
-kubectl -n tenant-a port-forward svc/demo-api 8081:80
+kubectl -n tenant-a port-forward svc/demo-api 8081:8000
 ```
 
 New terminal:
@@ -74,7 +74,7 @@ Expected:
 ```
 
 ```bash
-kubectl -n tenant-b port-forward svc/demo-api 8082:80
+kubectl -n tenant-b port-forward svc/demo-api 8082:8000
 ```
 
 New terminal:
@@ -106,7 +106,7 @@ Open a PR and merge it (or push directly to main if you are demoing solo). In Ar
 
 Verify behavior:
 ```bash
-kubectl -n tenant-a port-forward svc/demo-api 8081:80
+kubectl -n tenant-a port-forward svc/demo-api 8081:8000
 curl http://localhost:8081/
 ```
 
@@ -152,8 +152,8 @@ Expected:
 ### Loki logs per tenant
 
 In Grafana Explore, select Loki and run:
-- `{namespace="tenant-a"} |= "tenant-a"`
-- `{namespace="tenant-b"} |= "tenant-b"`
+- `{tenant="tenant-a"} |= "tenant-a"`
+- `{tenant="tenant-b"} |= "tenant-b"`
 
 Expected:
 - Log lines like `request path=/ status=200 tenant=tenant-a`.
@@ -176,7 +176,7 @@ Expected:
 - Ensure promtail is running and pods have emitted logs. Trigger with `curl` calls.
 
 6) k3d cluster creation fails
-- Check Docker is running and port 8080 is free.
+- Check Docker is running and port 8000 is free.
 
 7) Argo CD UI not reachable
 - Verify port-forward is active: `kubectl -n argocd port-forward svc/argocd-server 8083:443`.

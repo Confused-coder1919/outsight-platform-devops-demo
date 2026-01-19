@@ -3,9 +3,12 @@
 ## Pre-demo checklist
 
 - `gitops/argocd/tenant-a-app.yaml` and `gitops/argocd/tenant-b-app.yaml` point to your fork.
-- `gitops/tenants/tenant-a-values.yaml` and `gitops/tenants/tenant-b-values.yaml` use your GHCR image repo.
+- `charts/demo-api/tenants/tenant-a-values.yaml` and `charts/demo-api/tenants/tenant-b-values.yaml`
+  use your GHCR image repo (these are what Argo CD reads locally).
 - Docker, kubectl, helm, and k3d are installed.
 - Optional: run `docker login ghcr.io` if you want to pull a private image.
+- If you are not pulling from GHCR, build the local image first:
+  `docker build -t ghcr.io/confused-coder1919/outsight-platform-devops-demo/demo-api:dev .`
 
 ## Demo commands (exact)
 
@@ -90,12 +93,13 @@ Expected:
 ## Show Argo CD sync via a Git change
 
 Note: This assumes Argo CD points to your GitHub fork and can pull it.
+For the local demo, edit the in-chart tenant values (Argo reads these).
 
 ```bash
 git checkout -b demo/tenant-a-change
-sed -i '' 's/tenant-a/tenant-a-demo/' gitops/tenants/tenant-a-values.yaml
+sed -i '' 's/tenant-a/tenant-a-demo/' charts/demo-api/tenants/tenant-a-values.yaml
 
-git add gitops/tenants/tenant-a-values.yaml
+git add charts/demo-api/tenants/tenant-a-values.yaml
 git commit -m "chore: update tenant-a label"
 git push -u origin demo/tenant-a-change
 ```

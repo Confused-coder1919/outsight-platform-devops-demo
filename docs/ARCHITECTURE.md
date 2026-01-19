@@ -31,6 +31,7 @@ Kubernetes (k3d)
 - CI runs lint/tests, builds a container, and pushes to GHCR (image repo is lowercased for GHCR compatibility).
 - On pushes to `main`, GitHub Actions opens a PR updating `gitops/tenants/*-values.yaml` with the new tag.
 - Argo CD watches the repo and syncs the updated Helm values into each tenant namespace.
+- Local note: Argo CD reads tenant values from `charts/demo-api/tenants/` to avoid path traversal.
 
 ## Why GitOps
 

@@ -12,7 +12,8 @@ realistic and runnable locally on k3d.
 1) Developer pushes code.
 2) CI runs lint/tests, builds the image, pushes to GHCR, and opens a PR updating tenant
    image tags in `gitops/tenants/*-values.yaml`.
-3) Argo CD watches the repo and syncs the Helm chart with tenant-specific values.
+3) Argo CD watches the repo and syncs the Helm chart with tenant values from
+   `charts/demo-api/tenants/` (local-safe path).
 4) Prometheus scrapes each tenant via ServiceMonitor; Grafana dashboards visualize metrics;
    Loki/Promtail provide tenant-labeled logs.
 
@@ -29,17 +30,20 @@ realistic and runnable locally on k3d.
 - Helm chart: `charts/demo-api`
   - Templates: Deployment, Service, ServiceMonitor.
   - Values: `tenantName`, `image.repository`, `image.tag`, ServiceMonitor labels.
-- Tenants:
+- Tenants (Argo local):
+  - `charts/demo-api/tenants/tenant-a-values.yaml`
+  - `charts/demo-api/tenants/tenant-b-values.yaml`
+- Tenants (GitOps PRs):
   - `gitops/tenants/tenant-a-values.yaml`
   - `gitops/tenants/tenant-b-values.yaml`
-  - Each overrides `tenantName` and image tag/repo.
+  - Keep these in sync when demoing locally.
 
 ## GitOps (Argo CD)
 
 - Applications:
   - `gitops/argocd/tenant-a-app.yaml`
   - `gitops/argocd/tenant-b-app.yaml`
-- Each points to `charts/demo-api` and uses its tenant values file.
+- Each points to `charts/demo-api` and uses tenant values under `charts/demo-api/tenants/`.
 - Uses `CreateNamespace=true` to auto-create `tenant-a` and `tenant-b` namespaces.
 
 ## CI/CD
@@ -80,6 +84,8 @@ realistic and runnable locally on k3d.
 ## Placeholders to update
 
 - GHCR repo path:
+  - `charts/demo-api/tenants/tenant-a-values.yaml`
+  - `charts/demo-api/tenants/tenant-b-values.yaml`
   - `gitops/tenants/tenant-a-values.yaml`
   - `gitops/tenants/tenant-b-values.yaml`
   - `.github/workflows/ci.yml` `IMAGE_REPO`

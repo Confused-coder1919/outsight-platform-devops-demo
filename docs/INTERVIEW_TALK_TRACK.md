@@ -17,7 +17,9 @@ For observability, kube-prometheus-stack scrapes each tenant via ServiceMonitor,
 1) Start at the app: `app/main.py` is a tiny FastAPI service with `/`, `/health`, and `/metrics`. It adds Prometheus counters and latency histograms and logs each request with the tenant name.
 2) Containerize: `Dockerfile` builds a minimal image. This mirrors how the CI system will publish artifacts.
 3) Helm chart: `charts/demo-api` templates Deployment, Service, and ServiceMonitor. The chart is parameterized by `tenantName`, `image.repository`, and `image.tag`.
-4) Multi-tenant config: `gitops/tenants/tenant-a-values.yaml` and `tenant-b-values.yaml` set the tenant name and image tag. This is the GitOps layer and is intentionally separate from the chart to show per-tenant overrides.
+4) Multi-tenant config: Argo CD reads tenant values from `charts/demo-api/tenants/` for local
+   compatibility, while `gitops/tenants/` is the GitOps layer updated by CI. Both set the
+   tenant name and image tag.
 5) GitOps: `gitops/argocd/*-app.yaml` defines two Argo CD Applications, each pointing at the same chart but with different values and namespaces. Argo CD creates the namespaces and keeps them reconciled.
 6) CI/CD: `.github/workflows/ci.yml` runs lint/tests, builds and pushes to GHCR, then opens a PR updating the GitOps values. That PR is what drives the deployment change, which is a common production pattern. `.gitlab-ci.yml` mirrors the same logic for parity.
 7) Observability: `observability/helm-values/*` installs kube-prometheus-stack and Loki. The chart’s ServiceMonitor uses a release label that matches the Prometheus selector so each tenant is scraped. Grafana uses a tenant dashboard from `observability/grafana/dashboards/tenant-overview.json`.

@@ -13,7 +13,7 @@ and deploys both tenants via GitOps.
 ## Clone and enter repo
 
 ```bash
-git clone https://github.com/CHANGEME/outsight-platform-devops-demo.git
+git clone https://github.com/confused-coder1919/outsight-platform-devops-demo.git
 cd outsight-platform-devops-demo
 ```
 
@@ -40,6 +40,8 @@ make argocd
 ```bash
 make gitops
 ```
+
+If you are not pulling from GHCR, build the local image first (see "Local image" below).
 
 ## Verify workloads
 
@@ -109,5 +111,8 @@ docker build -t ghcr.io/confused-coder1919/outsight-platform-devops-demo/demo-ap
 
 - Update the Git repository URL in `gitops/argocd/tenant-a-app.yaml` and
   `gitops/argocd/tenant-b-app.yaml` to point at your fork.
-- Update `image.repository` in `gitops/tenants/*.yaml` to match your GHCR path.
+- Update `image.repository` in `charts/demo-api/tenants/*.yaml` to match your GHCR path.
+- For CI/GitOps PRs, keep `gitops/tenants/*.yaml` aligned with the same image repo.
 - Keep `.github/workflows/ci.yml` `IMAGE_REPO` aligned with the same GHCR path.
+- For local Argo CD, tenant values live in `charts/demo-api/tenants/`. If you change
+  `gitops/tenants/`, copy those updates into the chart tenant files.

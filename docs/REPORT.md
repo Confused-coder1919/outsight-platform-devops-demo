@@ -20,7 +20,8 @@
 - App exposes `/`, `/health`, `/metrics` with Prometheus counters and latency histograms.
 - Helm chart supports per-tenant values and ServiceMonitor configuration.
 - GitHub Actions runs lint/tests, builds the image, pushes to GHCR, and opens a PR to
-  update image tags in GitOps values.
+  update image tags in GitOps values (`gitops/tenants/`).
+- For local Argo CD, tenant values live under `charts/demo-api/tenants/`.
 - GitLab CI mirrors the pipeline stages for parity and interview discussion.
 - k3d scripts bootstrap a local cluster and install observability + Argo CD.
 - Cloud-native integration (simulated): documentation notes how metrics/logs could be

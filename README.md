@@ -27,6 +27,8 @@ kubectl get pods -n tenant-b
 - PRs: lint + tests only.
 - Push to `main`: build/push image to GHCR, update tenant image values, open a GitOps PR.
 - Argo CD syncs the merged values into tenant namespaces.
+- Local note: Argo CD reads tenant values from `charts/demo-api/tenants/`. CI updates
+  `gitops/tenants/` for GitOps PRs, so keep them in sync when demoing locally.
 
 ## Local Docker (sanity check)
 

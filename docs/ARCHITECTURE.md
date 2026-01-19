@@ -28,8 +28,8 @@ Kubernetes (k3d)
 ## CI -> Image -> GitOps -> Deploy flow
 
 - Developer pushes code to GitHub/GitLab.
-- CI runs lint/tests, builds a container, and pushes to GHCR.
-- GitHub Actions opens a PR updating `gitops/tenants/*-values.yaml` with the new tag.
+- CI runs lint/tests, builds a container, and pushes to GHCR (image repo is lowercased for GHCR compatibility).
+- On pushes to `main`, GitHub Actions opens a PR updating `gitops/tenants/*-values.yaml` with the new tag.
 - Argo CD watches the repo and syncs the updated Helm values into each tenant namespace.
 
 ## Multi-tenant model (namespace isolation)

@@ -3,6 +3,6 @@ tenantName: "tenant-a"
 
 image:
   # Keep in sync with .github/workflows/ci.yml IMAGE_REPO.
-  repository: ghcr.io/CHANGEME/outsight-platform-devops-demo/demo-api
+  repository: ghcr.io/your-username/outsight-platform-devops-demo/demo-api
   # CI updates this tag via PR to drive GitOps deployments.
   tag: "dev"

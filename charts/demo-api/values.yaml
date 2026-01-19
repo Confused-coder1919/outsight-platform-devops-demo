@@ -2,7 +2,7 @@ replicaCount: 1
 
 image:
   # Defaults for a demo; overridden per tenant in gitops/tenants/.
-  repository: ghcr.io/CHANGEME/outsight-platform-devops-demo/demo-api
+  repository: ghcr.io/your-username/outsight-platform-devops-demo/demo-api
   tag: "dev"
   pullPolicy: IfNotPresent
 

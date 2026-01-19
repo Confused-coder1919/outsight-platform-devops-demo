@@ -1,0 +1,47 @@
+{{- if .Values.networkPolicy.enabled }}
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: {{ include "demo-api.fullname" . }}
+  labels:
+    {{- include "demo-api.labels" . | nindent 4 }}
+    {{- include "demo-api.tenantLabels" . | nindent 4 }}
+spec:
+  podSelector:
+    matchLabels:
+      {{- include "demo-api.selectorLabels" . | nindent 6 }}
+  policyTypes:
+    - Ingress
+    - Egress
+  ingress:
+    - from:
+        # Allow in-namespace traffic (service-to-pod).
+        - podSelector: {}
+        {{- if .Values.networkPolicy.allowIngressFromObservability }}
+        # Allow Prometheus in the observability namespace to scrape metrics.
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: observability
+        {{- end }}
+      ports:
+        - protocol: TCP
+          port: {{ .Values.service.targetPort }}
+  egress:
+    - to:
+        # Allow DNS lookups for service discovery.
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: kube-system
+      ports:
+        - protocol: UDP
+          port: 53
+        - protocol: TCP
+          port: 53
+    {{- if .Values.networkPolicy.allowEgressToObservability }}
+    - to:
+        # Optional: allow egress to observability if the app exports data directly.
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: observability
+    {{- end }}
+{{- end }}

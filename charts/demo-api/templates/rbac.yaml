@@ -1,0 +1,68 @@
+{{- if .Values.rbac.tenantViewer.enabled }}
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: {{ .Values.rbac.tenantViewer.serviceAccountName }}
+  labels:
+    {{- include "demo-api.labels" . | nindent 4 }}
+    {{- include "demo-api.tenantLabels" . | nindent 4 }}
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: {{ .Values.rbac.tenantViewer.roleName }}
+  labels:
+    {{- include "demo-api.labels" . | nindent 4 }}
+    {{- include "demo-api.tenantLabels" . | nindent 4 }}
+rules:
+  # Read-only access to common workload and service resources.
+  - apiGroups: ["", "apps"]
+    resources:
+      - pods
+      - pods/log
+      - services
+      - endpoints
+      - configmaps
+      - deployments
+      - replicasets
+    verbs: ["get", "list", "watch"]
+  - apiGroups: [""]
+    resources:
+      - events
+    verbs: ["get", "list", "watch"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: {{ .Values.rbac.tenantViewer.roleName }}
+  labels:
+    {{- include "demo-api.labels" . | nindent 4 }}
+    {{- include "demo-api.tenantLabels" . | nindent 4 }}
+subjects:
+  - kind: ServiceAccount
+    name: {{ .Values.rbac.tenantViewer.serviceAccountName }}
+    namespace: {{ .Release.Namespace }}
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: {{ .Values.rbac.tenantViewer.roleName }}
+{{- end }}
+{{- if .Values.rbac.argocd.enabled }}
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: argocd-application-controller
+  labels:
+    {{- include "demo-api.labels" . | nindent 4 }}
+    {{- include "demo-api.tenantLabels" . | nindent 4 }}
+subjects:
+  - kind: ServiceAccount
+    name: {{ .Values.rbac.argocd.serviceAccountName }}
+    namespace: {{ .Values.rbac.argocd.namespace }}
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  # Namespace-scoped grant so Argo CD can manage tenant resources.
+  kind: ClusterRole
+  name: {{ .Values.rbac.argocd.clusterRole }}
+{{- end }}

@@ -1,0 +1,28 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: demo-api-tenant-a
+  namespace: argocd
+spec:
+  project: default
+  source:
+    # Point this to your fork so Argo CD can pull the chart and values.
+    repoURL: https://github.com/CHANGEME/outsight-platform-devops-demo.git
+    targetRevision: main
+    path: charts/demo-api
+    helm:
+      valueFiles:
+        # Values live outside the chart to model GitOps-style tenant configs.
+        - ../../gitops/tenants/tenant-a-values.yaml
+  destination:
+    server: https://kubernetes.default.svc
+    # Namespace-per-tenant keeps workloads and metrics isolated.
+    namespace: tenant-a
+  syncPolicy:
+    automated:
+      # Auto-sync keeps the demo hands-off once the Application exists.
+      prune: true
+      selfHeal: true
+    syncOptions:
+      # Argo CD will create the tenant namespace if it doesn't exist.
+      - CreateNamespace=true

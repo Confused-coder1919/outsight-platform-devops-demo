@@ -1,0 +1,49 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "demo-api.fullname" . }}
+  labels:
+    {{- include "demo-api.labels" . | nindent 4 }}
+    {{- include "demo-api.tenantLabels" . | nindent 4 }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      {{- include "demo-api.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "demo-api.selectorLabels" . | nindent 8 }}
+        {{- include "demo-api.tenantLabels" . | nindent 8 }}
+    spec:
+      containers:
+        - name: {{ include "demo-api.name" . }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          env:
+            # Tenant name makes the same image behave differently per namespace.
+            - name: TENANT_NAME
+              value: "{{ .Values.tenantName }}"
+            # App name is used to tag metrics for easier filtering.
+            - name: APP_NAME
+              value: "{{ .Values.appName }}"
+          ports:
+            - name: http
+              containerPort: {{ .Values.service.targetPort }}
+              protocol: TCP
+          livenessProbe:
+            # Health checks reduce noisy restarts during deployment updates.
+            httpGet:
+              path: /health
+              port: http
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          readinessProbe:
+            # Readiness gates traffic so tenants only receive healthy pods.
+            httpGet:
+              path: /health
+              port: http
+            initialDelaySeconds: 3
+            periodSeconds: 5
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}

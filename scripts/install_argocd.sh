@@ -1,0 +1,19 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+ARGOCD_VERSION="${ARGOCD_VERSION:-v2.11.7}"
+
+if kubectl get namespace argocd >/dev/null 2>&1; then
+  echo "Namespace 'argocd' already exists."
+else
+  echo "Creating namespace 'argocd'..."
+  kubectl create namespace argocd
+fi
+
+echo "Installing Argo CD ${ARGOCD_VERSION}..."
+kubectl apply -n argocd -f "https://raw.githubusercontent.com/argoproj/argo-cd/${ARGOCD_VERSION}/manifests/install.yaml"
+
+echo "Waiting for Argo CD server to be ready..."
+kubectl rollout status -n argocd deployment/argocd-server --timeout=180s
+
+echo "Argo CD installed."

@@ -1,0 +1,54 @@
+{{- if .Values.prometheusRule.enabled }}
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: {{ include "demo-api.fullname" . }}
+  labels:
+    {{- include "demo-api.labels" . | nindent 4 }}
+    {{- include "demo-api.tenantLabels" . | nindent 4 }}
+    {{- with .Values.prometheusRule.labels }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
+spec:
+  groups:
+    - name: demo-api.rules
+      rules:
+        - alert: DemoApiPodRestarts
+          expr: increase(kube_pod_container_status_restarts_total{namespace="{{ .Release.Namespace }}"}[10m]) > 3
+          for: 10m
+          labels:
+            severity: warning
+            tenant: {{ .Values.tenantName }}
+            app: {{ .Values.appName }}
+            environment: {{ .Values.environment }}
+          annotations:
+            summary: "Pods restarting frequently in {{ .Release.Namespace }}"
+            description: "A container has restarted more than 3 times in the last 10 minutes."
+        - alert: DemoApiHighErrorRate
+          expr: |
+            (
+              sum(rate(http_requests_total{tenant="{{ .Values.tenantName }}",status=~"5.."}[5m]))
+              /
+              sum(rate(http_requests_total{tenant="{{ .Values.tenantName }}"}[5m]))
+            ) > 0.05
+          for: 5m
+          labels:
+            severity: warning
+            tenant: {{ .Values.tenantName }}
+            app: {{ .Values.appName }}
+            environment: {{ .Values.environment }}
+          annotations:
+            summary: "High 5xx error rate for {{ .Values.tenantName }}"
+            description: "More than 5% of requests are 5xx over 5 minutes."
+        - alert: DemoApiNoTraffic
+          expr: sum(rate(http_requests_total{tenant="{{ .Values.tenantName }}"}[10m])) == 0
+          for: 15m
+          labels:
+            severity: warning
+            tenant: {{ .Values.tenantName }}
+            app: {{ .Values.appName }}
+            environment: {{ .Values.environment }}
+          annotations:
+            summary: "No traffic for {{ .Values.tenantName }}"
+            description: "No requests observed in the last 15 minutes."
+{{- end }}

@@ -1,0 +1,63 @@
+replicaCount: 1
+
+image:
+  # Defaults for a demo; overridden per tenant in gitops/tenants/.
+  repository: ghcr.io/CHANGEME/outsight-platform-devops-demo/demo-api
+  tag: "dev"
+  pullPolicy: IfNotPresent
+
+service:
+  # ClusterIP keeps traffic internal; port-forward for local access.
+  type: ClusterIP
+  port: 80
+  targetPort: 8080
+
+# Used to stamp tenant identity into responses and metrics labels.
+tenantName: "default"
+# App name is stable across tenants; override only if you run multiple apps.
+appName: "demo-api"
+# Environment label to distinguish dev/stage/prod.
+environment: "dev"
+
+resources:
+  requests:
+    cpu: 50m
+    memory: 64Mi
+  limits:
+    cpu: 200m
+    memory: 256Mi
+
+serviceMonitor:
+  enabled: true
+  interval: 15s
+  path: /metrics
+  labels:
+    # Must match kube-prometheus-stack serviceMonitorSelector.
+    release: kube-prometheus-stack
+
+podDisruptionBudget:
+  enabled: true
+  minAvailable: 1
+
+networkPolicy:
+  enabled: true
+  # Allow Prometheus in the observability namespace to scrape /metrics.
+  allowIngressFromObservability: true
+  # Set to true if the app must talk to observability services.
+  allowEgressToObservability: false
+
+rbac:
+  tenantViewer:
+    enabled: true
+    serviceAccountName: tenant-viewer
+    roleName: tenant-viewer
+  argocd:
+    enabled: true
+    namespace: argocd
+    serviceAccountName: argocd-application-controller
+    clusterRole: edit
+
+prometheusRule:
+  enabled: true
+  labels:
+    release: kube-prometheus-stack

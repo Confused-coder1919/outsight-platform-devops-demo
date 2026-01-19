@@ -1,0 +1,18 @@
+grafana:
+  enabled: false
+
+loki:
+  enabled: true
+  persistence:
+    enabled: false
+
+promtail:
+  enabled: true
+  serviceMonitor:
+    enabled: true
+  config:
+    snippets:
+      # Carry tenant/app/environment labels into Loki for filtering.
+      extraRelabelConfigs:
+        - action: labelmap
+          regex: __meta_kubernetes_pod_label_(tenant|app|environment)

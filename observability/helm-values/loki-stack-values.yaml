@@ -1,10 +1,23 @@
-grafana:
-  enabled: false
-
 loki:
   enabled: true
+  # Grafana must keep Prometheus as the only default datasource.
+  isDefault: false
+  # Align with Grafana's Loki health check query support.
+  image:
+    tag: "2.9.4"
+  # Explicit URL to avoid DNS ambiguity when provisioning.
+  url: http://loki.observability:3100
   persistence:
     enabled: false
+
+grafana:
+  enabled: false
+  sidecar:
+    datasources:
+      # Match kube-prometheus-stack Grafana sidecar datasource label.
+      label: grafana_datasource
+      labelValue: "1"
+      enabled: true
 
 promtail:
   enabled: true

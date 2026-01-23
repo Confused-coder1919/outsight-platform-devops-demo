@@ -1,8 +1,7 @@
 # Tenant-specific value used in responses and metrics labels.
 tenantName: "tenant-a"
-
 image:
   # Keep in sync with .github/workflows/ci.yml IMAGE_REPO.
   repository: ghcr.io/confused-coder1919/outsight-platform-devops-demo/demo-api
   # CI updates this tag via PR to drive GitOps deployments.
-  tag: "dev"
+  tag: "sha-9c10e57"
